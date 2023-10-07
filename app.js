@@ -2,6 +2,10 @@ const express = require('express');
 const morgan = require('morgan');
 const cors = require('cors');
 
+const authRouter = require('./routes/api/auth');
+const transactionsRouter = require('./routes/api/transactions');
+const otherOperations = require('./routes/api/other');
+
 const app = express();
 
 // Middlewares
@@ -10,7 +14,9 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
-// app.use('/api/contacts', someRoute);
+app.use('/api/auth', authRouter);
+app.use('/api/transactions', transactionsRouter);
+app.use('/api', otherOperations);
 
 // Handle not defined routes
 app.all('*', (req, res, next) => {
