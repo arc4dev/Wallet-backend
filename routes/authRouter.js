@@ -7,8 +7,9 @@ router.post('/sign-up', authController.signUp);
 
 router.post('/sign-in', authController.signIn);
 
-router.post('/sign-out', authController.signOut);
+router.get('/sign-out', authController.signOut);
 
-router.get('/users/current', authController.getCurrentUser);
+// tutaj powinien byc oddzielny plik userRouter i userController ale przez to ze jest tylko jeden endpoint to na razie mozna tak zostawic
+router.get('/current', authController.getCurrentUser);
 
 module.exports = router;

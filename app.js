@@ -6,6 +6,7 @@ const cors = require('cors');
 
 const authRouter = require('./routes/authRouter');
 const transactionsRouter = require('./routes/transactionsRouter');
+const errorHandler = require('./controllers/errorController');
 
 const app = express();
 
@@ -24,8 +25,6 @@ app.all('*', (req, res, next) => {
 });
 
 // Error Handler
-app.use((err, req, res, next) => {
-  res.status(500).json({ message: err.message });
-});
+app.use(errorHandler);
 
 module.exports = app;
