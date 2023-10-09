@@ -14,9 +14,19 @@ const removeTransaction = async (req, res, next) => {
   console.log('remove transaction');
 };
 
+const getTransactionCategories = async (req, res, next) => {
+  console.log('transaction categories');
+};
+
+const getTransactionsSummary = async (req, res, next) => {
+  console.log('transactions summary');
+};
+
 module.exports = {
   createNewTransaction,
   getAllTransactions,
   updateTransaction,
   removeTransaction,
+  getTransactionCategories,
+  getTransactionsSummary,
 };

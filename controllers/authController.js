@@ -1,7 +1,4 @@
 // const jwt = require('jsonwebtoken');
-// const User = require('../service/schemas/user');
-
-// const secret = process.env.SECRET;
 
 const signUp = async (req, res, next) => {
   try {
@@ -16,7 +13,7 @@ const signUp = async (req, res, next) => {
     //   id: user.id,
     //   username: email,
     // };
-    // const token = jwt.sign(payload, secret, { expiresIn: '1h' });
+    // const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
 
     // user.token = token;
     // await user.save();
@@ -45,8 +42,13 @@ const signOut = async (req, res, next) => {
   console.log('sign out');
 };
 
+const getCurrentUser = async (req, res, next) => {
+  console.log('current user');
+};
+
 module.exports = {
   signUp,
   signIn,
   signOut,
+  getCurrentUser,
 };

@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 const { Schema } = mongoose;
 
-const finance = new Schema({
+const transactionSchema = new Schema({
   amount: {
     type: Number,
     required: [true, 'Amount is required'],
@@ -24,6 +24,6 @@ const finance = new Schema({
   },
 });
 
-const Finance = mongoose.model('finance', finance);
+const Transaction = mongoose.model('Transaction', transactionSchema);
 
-export default Finance;
+export default Transaction;

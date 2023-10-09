@@ -1,8 +1,3 @@
-const mongoose = require('mongoose');
-
-// const uriDb = process.env.DB_HOST;
-// const connection = mongoose.connect(uriDb);
-
 // Handling uncaught exceptions
 process.on('uncaughtException', err => {
   console.log(err.name, err.message, err.stack);
