@@ -1,3 +1,4 @@
+
 const signUp = async (req, res, next) => {
   console.log('sign up');
 };
