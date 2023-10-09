@@ -1,4 +1,5 @@
 // const jwt = require('jsonwebtoken');
+const User = require('../models/userModel');
 
 const signUp = async (req, res, next) => {
   try {
@@ -39,7 +40,27 @@ const signIn = async (req, res, next) => {
 };
 
 const signOut = async (req, res, next) => {
-  console.log('sign out');
+  const getUserbyId = async id => {
+    try {
+      return await User.findById(id);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+  try {
+    const { id } = req.user;
+    const user = await getUserbyId(id);
+    if (!user) {
+      return res.status(404).json('Error! User not found!');
+    }
+    user.token = null;
+    await user.save();
+    res.status(204).json({ message: 'User signed out' });
+  } catch (error) {
+    res.status(401).json({
+      message: 'Bearer auth failed',
+    });
+  }
 };
 
 const getCurrentUser = async (req, res, next) => {
