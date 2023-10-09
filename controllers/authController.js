@@ -1,10 +1,49 @@
+
 // const jwt = require('jsonwebtoken');
-const User = require('../models/userModel');
+const passport = require('../config/config-passport.js');
+const User = require('../models/userModel.js');
+
+const auth = async (req, res, next) => {
+  try {
+    await passport.authenticate('jwt', { session: false }, async (err, user) => {
+      if (!user || err) {
+        return res.status(401).json({
+          status: 'error',
+          code: 401,
+          message: 'Unauthorized',
+          data: 'Unauthorized',
+        });
+      }
+
+      const authHeader = req.headers.authorization;
+      const token = authHeader && authHeader.split(' ')[1];
+
+      const allUsers = await User.find();
+      const isToken = allUsers.some(user => user.token === token);
+      if (!isToken) {
+        return res.status(401).json({
+          status: 'error',
+          code: 401,
+          data: 'No Authorization',
+        });
+      }
+
+      req.user = user;
+      next();
+    })(req, res, next);
+  } catch (error) {
+    res.status(500).json({
+      status: 'error',
+      code: 500,
+      message: 'An error occurred during authentication.',
+    });
+  }
+};
 
 const signUp = async (req, res, next) => {
   try {
-    const { body } = req;
-    const { email, name, password } = body;
+    // const { body } = req;
+    // const { email, name, password } = body;
     // const user = await User.create({
     //   name,
     //   email,
@@ -24,11 +63,10 @@ const signUp = async (req, res, next) => {
     // return console.log('cannot find user');
     // }
 
-    return res.status(200).json({
+    res.status(200).json({
       status: 'success',
-      code: 200,
-      user: { body: { email, name, password } },
-      // token: token,
+      message: 'User signed up',
+      // token
     });
   } catch (err) {
     res.status(500).json({ error: 'Registration failed' });
@@ -36,7 +74,10 @@ const signUp = async (req, res, next) => {
 };
 
 const signIn = async (req, res, next) => {
-  console.log('sign in');
+  res.status(200).json({
+    status: 'success',
+    message: 'User logged in',
+  });
 };
 
 const signOut = async (req, res, next) => {
@@ -64,7 +105,9 @@ const signOut = async (req, res, next) => {
 };
 
 const getCurrentUser = async (req, res, next) => {
-  console.log('current user');
+  res.status(200).json({
+    status: 'success',
+  });
 };
 
 module.exports = {
@@ -72,4 +115,5 @@ module.exports = {
   signIn,
   signOut,
   getCurrentUser,
+  auth,
 };
