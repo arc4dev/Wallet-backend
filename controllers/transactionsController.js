@@ -1,25 +1,37 @@
 const createNewTransaction = async (req, res, next) => {
-  console.log('create new transaction');
+  res.status(200).json({
+    status: 'success',
+  });
 };
 
 const getAllTransactions = async (req, res, next) => {
-  console.log('get all transaction');
+  res.status(200).json({
+    status: 'success',
+  });
 };
 
 const updateTransaction = async (req, res, next) => {
-  console.log('update transaction');
+  res.status(200).json({
+    status: 'success',
+  });
 };
 
 const removeTransaction = async (req, res, next) => {
-  console.log('remove transaction');
+  res.status(200).json({
+    status: 'success',
+  });
 };
 
 const getTransactionCategories = async (req, res, next) => {
-  console.log('transaction categories');
+  res.status(200).json({
+    status: 'success',
+  });
 };
 
 const getTransactionsSummary = async (req, res, next) => {
-  console.log('transactions summary');
+  res.status(200).json({
+    status: 'success',
+  });
 };
 
 module.exports = {

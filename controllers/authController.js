@@ -40,8 +40,8 @@ const auth = async (req, res, next) => {
 
 const signUp = async (req, res, next) => {
   try {
-    const { body } = req;
-    const { email, name, password } = body;
+    // const { body } = req;
+    // const { email, name, password } = body;
     // const user = await User.create({
     //   name,
     //   email,
@@ -61,11 +61,10 @@ const signUp = async (req, res, next) => {
     // return console.log('cannot find user');
     // }
 
-    return res.status(200).json({
+    res.status(200).json({
       status: 'success',
-      code: 200,
-      user: { body: { email, name, password } },
-      // token: token,
+      message: 'User signed up',
+      // token
     });
   } catch (err) {
     res.status(500).json({ error: 'Registration failed' });
@@ -73,15 +72,23 @@ const signUp = async (req, res, next) => {
 };
 
 const signIn = async (req, res, next) => {
-  console.log('sign in');
+  res.status(200).json({
+    status: 'success',
+    message: 'User logged in',
+  });
 };
 
 const signOut = async (req, res, next) => {
-  console.log('sign out');
+  res.status(200).json({
+    status: 'success',
+    message: 'User logged out',
+  });
 };
 
 const getCurrentUser = async (req, res, next) => {
-  console.log('current user');
+  res.status(200).json({
+    status: 'success',
+  });
 };
 
 module.exports = {
