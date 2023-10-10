@@ -1,3 +1,5 @@
+const Transaction = require('../models/transactionModel');
+
 const createNewTransaction = async (req, res, next) => {
   res.status(200).json({
     status: 'success',
@@ -23,11 +25,21 @@ const removeTransaction = async (req, res, next) => {
 };
 
 const getTransactionCategories = async (req, res, next) => {
-  res.status(200).json({
-    status: 'success',
-  });
-};
+  try {
+    // Używa agregacji MongoDB, aby pobrać unikalne kategorie transakcji
+    const categories = await Transaction.distinct('category');
 
+    res.status(200).json({
+      status: 'success',
+      categories: categories,
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: 'error',
+      message: 'An error occurred while fetching transaction categories.',
+    });
+  }
+};
 const getTransactionsSummary = async (req, res, next) => {
   res.status(200).json({
     status: 'success',
