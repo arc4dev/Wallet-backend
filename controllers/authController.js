@@ -6,10 +6,8 @@ const auth = async (req, res, next) => {
     await passport.authenticate('jwt', { session: false }, async (err, user) => {
       if (!user || err) {
         return res.status(401).json({
-          status: 'error',
-          code: 401,
+          status: 'fail',
           message: 'Unauthorized',
-          data: 'Unauthorized',
         });
       }
 
@@ -21,8 +19,7 @@ const auth = async (req, res, next) => {
       if (!isToken) {
         return res.status(401).json({
           status: 'error',
-          code: 401,
-          data: 'No Authorization',
+          message: 'Unauthorized',
         });
       }
 
@@ -32,7 +29,6 @@ const auth = async (req, res, next) => {
   } catch (error) {
     res.status(500).json({
       status: 'error',
-      code: 500,
       message: 'An error occurred during authentication.',
     });
   }
