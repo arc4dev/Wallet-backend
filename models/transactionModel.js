@@ -1,13 +1,12 @@
 const mongoose = require('mongoose');
-const { Schema } = mongoose;
 
-const transactionSchema = new Schema({
+const transactionSchema = new mongoose.Schema({
   amount: {
     type: Number,
     required: [true, 'Amount is required'],
   },
   owner: {
-    type: Schema.Types.ObjectId,
+    type: mongoose.Schema.Types.ObjectId,
     ref: 'user',
   },
   date: {

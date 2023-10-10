@@ -13,7 +13,9 @@ const auth = (req, res, next) => {
     req.user = user;
     next();
   })(req, res, next);
+
 };
+
 const signUp = async (req, res, next) => {
   try {
     // const { body } = req;
