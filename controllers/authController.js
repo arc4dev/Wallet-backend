@@ -2,6 +2,12 @@ const passport = require('../config/config-passport.js');
 const User = require('../models/userModel.js');
 const jwt = require('jsonwebtoken');
 
+// helpers
+const signToken = payload =>
+  jwt.sign(payload, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRATION,
+  });
+
 const auth = async (req, res, next) => {
   try {
     await passport.authenticate('jwt', { session: false }, async (err, user) => {
@@ -27,102 +33,95 @@ const signUp = async (req, res, next) => {
   try {
     const { body } = req;
     const { email, name, password } = body;
+
+    // 1. Create a user
     const user = await User.create({
       name,
       email,
       password,
     });
-    const payload = {
+
+    // 2. Sign a token to that user
+    const token = signToken({
       id: user.id,
       username: email,
-    };
-    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+    });
 
-    user.token = token;
-    await user.save();
-    const owner = await User.find();
-    const singleUser = owner.find(user => user.email === email);
-    if (!singleUser) {
-      return console.log('cannot find user');
-    }
-
-    res.status(200).json({
+    // 3. Send a token to the client
+    res.status(201).json({
       status: 'success',
-      message: 'User signed up',
       token,
+      data: user,
     });
   } catch (err) {
-    res.status(500).json({ error: 'Registration failed' });
+    res.status(400).json({ status: 'fail', message: err.message });
   }
 };
 
 const signIn = async (req, res, next) => {
   try {
-    const { email } = req.body;
-    const user = await User.findOne({ email });
+    const { email, password } = req.body;
 
-    if (!user) return res.status(404).json({ status: 'fail', message: 'User not found' });
+    // 1) Check if password and email are provided
+    if (!email || !password)
+      return res
+        .status(400)
+        .json({ status: 'fail', message: 'Please provide an email or password' });
 
-    const payload = {
+    // 2) Check if user exists and password is correct
+    const user = await User.findOne({
+      email,
+    }).select('+password');
+
+    if (!user || !(await user.isCorrectPassword(password, user.password)))
+      return res
+        .status(400)
+        .json({ status: 'fail', message: 'The email or password is incorrect!' });
+
+    // 3) If everything is ok, send token to client
+    const token = signToken({
       id: user.id,
-      username: user.email,
-    };
-    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
-    user.token = token;
-    await user.save();
-    console.log(token);
-    return res.status(200).json({
+      username: email,
+    });
+
+    res.status(200).json({
       status: 'success',
-      message: 'User logged in',
-      data: user,
+      token,
     });
   } catch (err) {
-    return res.status(500).json({
-      status: 'error',
-      code: 500,
-      data: err,
-    });
+    res.status(400).json({ status: 'fail', message: err.message });
   }
 };
 
 const signOut = async (req, res, next) => {
   try {
-    const { id } = req.user;
-    const user = await User.findById(id);
-    if (!user) {
-      return res.status(404).json({ Error: 'User not found' });
-    }
-    user.token = null;
-    await user.save();
+    // wylogowaniem musi byc dodanie tokena do czanrje listy i przy funkcji auth sprawdzanie czy token nalezy do tej listy
 
     res.status(200).json({
       status: 'success',
-      message: 'User logged out',
-      data: user,
+      data: null,
     });
   } catch (err) {
-    return res.status(500).json(err.message);
+    res.status(400).json({ status: 'fail', message: err.message });
   }
 };
 
 const getCurrentUser = async (req, res, next) => {
   try {
     const { id } = req.user;
+    // 1. Find a user
     const user = await User.findById(id);
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ status: 'fail', message: 'User not found' });
     }
-    return res.status(200).json({
+
+    // 2. Send a response
+    res.status(200).json({
       status: 'success',
-      code: 200,
       data: user,
     });
   } catch (err) {
-    return res.status(500).json({
-      status: 'error',
-      code: 500,
-      message: `${err}`,
-    });
+    res.status(400).json({ status: 'fail', message: err.message });
   }
 };
 
