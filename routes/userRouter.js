@@ -9,6 +9,6 @@ router.use(authController.auth);
 
 router.get('/current', userController.getCurrentUser);
 
-router.get('/transactions', userController.getCurrentUser);
+router.get('/transactions', userController.getUserTransactions);
 
 module.exports = router;

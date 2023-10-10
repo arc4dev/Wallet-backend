@@ -27,12 +27,12 @@ const getUserTransactions = async (req, res, next) => {
 
     res.status(200).json({
       status: 'success',
-      transactions: userTransactions,
+      data: userTransactions,
     });
   } catch (err) {
-    res.status(500).json({
-      status: 'error',
-      message: 'An error occurred while fetching user transactions.',
+    res.status(400).json({
+      status: 'fail',
+      message: err.message,
     });
   }
 };

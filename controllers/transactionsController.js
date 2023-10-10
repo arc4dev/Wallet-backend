@@ -62,24 +62,6 @@ const getTransactionCategories = async (req, res, next) => {
   }
 };
 
-const getUserTransactions = async (req, res, next) => {
-  try {
-    // Pobierz transakcje użytkownika na podstawie ID użytkownika
-    const userId = req.user._id;
-    const userTransactions = await Transaction.find({ owner: userId });
-
-    res.status(200).json({
-      status: 'success',
-      transactions: userTransactions,
-    });
-  } catch (err) {
-    res.status(500).json({
-      status: 'error',
-      message: 'An error occurred while fetching user transactions.',
-    });
-  }
-};
-
 const getTransactionsSummary = async (req, res, next) => {
   try {
     res.status(200).json({
@@ -96,6 +78,5 @@ module.exports = {
   updateTransaction,
   removeTransaction,
   getTransactionCategories,
-  getUserTransactions,
   getTransactionsSummary,
 };

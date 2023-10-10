@@ -16,9 +16,13 @@ const userSchema = new mongoose.Schema({
     default: null,
     required: [true, 'Name is require'],
   },
-  token: {
+  role: {
     type: String,
-    default: null,
+    enum: {
+      values: ['user', 'admin'],
+      message: 'The role must be either user or admin',
+    },
+    default: 'user',
   },
   //   verify: {
   //     type: Boolean,
@@ -38,6 +42,13 @@ userSchema.pre('save', async function (next) {
   this.password = await bcrypt.hash(this.password, 12);
 
   this.passwordConfirm = undefined;
+
+  next();
+});
+
+// Exclude fields before find
+userSchema.pre(/^find/, function (next) {
+  this.select('-__v -password');
 
   next();
 });

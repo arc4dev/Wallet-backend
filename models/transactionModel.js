@@ -16,12 +16,16 @@ const transactionSchema = new mongoose.Schema({
   },
   category: {
     type: String,
-    required: [true, 'Category is required'],
+    sparse: true,
   },
-  comment: {
-    type: String,
-    required: [false, `Comment isn't required`],
-  },
+  comment: String,
+});
+
+// Exclude fields before find
+transactionSchema.pre(/^find/, function (next) {
+  this.select('-__v');
+
+  next();
 });
 
 const Transaction = mongoose.model('Transaction', transactionSchema);
