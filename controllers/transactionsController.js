@@ -1,16 +1,20 @@
 const Transaction = require('../models/transactionModel');
 
 const createNewTransaction = async (req, res, next) => {
-  const createTransaction = ({ amount, date, category, comment }) => {
-    return Transaction.create({ amount, date, category, comment });
-  };
-  const { amount, date, category, comment } = req.body;
   try {
-    const newTransaction = await createTransaction({ amount, date, category, comment });
-    res.status(201).json(newTransaction);
-  } catch (e) {
-    console.error(e);
-    next(e);
+    const { amount, date, category, comment } = req.body;
+
+    const newTransaction = await Transaction.create({
+      amount,
+      date,
+      category,
+      comment,
+      owner: req.user._id,
+    });
+
+    res.status(201).json({ status: 'success', data: newTransaction });
+  } catch (err) {
+    res.status(400).json({ status: 'fail', message: err.message });
   }
 };
 

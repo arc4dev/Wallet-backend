@@ -8,18 +8,19 @@ const transactionSchema = new mongoose.Schema({
   owner: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'user',
+    required: [true, 'A transaction must have an owner'],
   },
   date: {
     type: String,
-    require: [true, 'Data is required'],
+    required: [true, 'Data is required'],
   },
   category: {
     type: String,
-    require: [true, 'Category is required'],
+    required: [true, 'Category is required'],
   },
   comment: {
     type: String,
-    require: [false, `Comment isn't required`],
+    required: [false, `Comment isn't required`],
   },
 });
 
