@@ -104,4 +104,5 @@ module.exports = {
   signUp,
   signIn,
   signOut,
+  auth,
 };
