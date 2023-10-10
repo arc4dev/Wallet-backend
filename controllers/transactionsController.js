@@ -1,27 +1,43 @@
 const Transaction = require('../models/transactionModel');
 
 const createNewTransaction = async (req, res, next) => {
-  res.status(200).json({
-    status: 'success',
-  });
+  try {
+    res.status(200).json({
+      status: 'success',
+    });
+  } catch (err) {
+    res.status(500).json({ err });
+  }
 };
 
 const getAllTransactions = async (req, res, next) => {
-  res.status(200).json({
-    status: 'success',
-  });
+  try {
+    res.status(200).json({
+      status: 'success',
+    });
+  } catch (err) {
+    res.status(500).json({ err });
+  }
 };
 
 const updateTransaction = async (req, res, next) => {
-  res.status(200).json({
-    status: 'success',
-  });
+  try {
+    res.status(200).json({
+      status: 'success',
+    });
+  } catch (err) {
+    res.status(500).json({ err });
+  }
 };
 
 const removeTransaction = async (req, res, next) => {
-  res.status(200).json({
-    status: 'success',
-  });
+  try {
+    res.status(200).json({
+      status: 'success',
+    });
+  } catch (err) {
+    res.status(500).json({ err });
+  }
 };
 
 const getTransactionCategories = async (req, res, next) => {
@@ -29,21 +45,23 @@ const getTransactionCategories = async (req, res, next) => {
     // Używa agregacji MongoDB, aby pobrać unikalne kategorie transakcji
     const categories = await Transaction.distinct('category');
 
-    res.status(200).json({
+    return res.status(200).json({
       status: 'success',
-      categories: categories,
+      data: categories,
     });
   } catch (err) {
-    res.status(500).json({
-      status: 'error',
-      message: 'An error occurred while fetching transaction categories.',
-    });
+    res.status(400).json({ status: 'fail', message: err.message });
   }
 };
+
 const getTransactionsSummary = async (req, res, next) => {
-  res.status(200).json({
-    status: 'success',
-  });
+  try {
+    res.status(200).json({
+      status: 'success',
+    });
+  } catch (err) {
+    res.status(500).json({ err });
+  }
 };
 
 module.exports = {
