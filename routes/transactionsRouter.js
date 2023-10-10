@@ -1,7 +1,10 @@
 const express = require('express');
 const transactionsController = require('../controllers/transactionsController');
+const authController = require('../controllers/authController');
 
 const router = express.Router();
+
+router.use(authController.auth);
 
 router
   .route('/')
@@ -13,7 +16,10 @@ router
   .patch(transactionsController.updateTransaction)
   .delete(transactionsController.removeTransaction);
 
-router.get('/transaction-categories', transactionsController.getTransactionCategories);
+router.get(
+  '/transaction-categories',
+  transactionsController.getTransactionCategories
+);
 
 router.get('/user-transactions', transactionsController.getUserTransactions);
 

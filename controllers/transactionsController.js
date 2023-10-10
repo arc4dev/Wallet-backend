@@ -1,33 +1,53 @@
 const Transaction = require('../models/transactionModel');
 
 const createNewTransaction = async (req, res, next) => {
-  res.status(200).json({
-    status: 'success',
-  });
+  try {
+    return res.status(200).json({
+      status: 'success',
+    });
+  } catch (err) {
+    return res.status(500).json({ err });
+  }
 };
 
 const getAllTransactions = async (req, res, next) => {
-  res.status(200).json({
-    status: 'success',
-  });
+  try {
+    return res.status(200).json({
+      status: 'success',
+    });
+  } catch (err) {
+    return res.status(500).json({ err });
+  }
 };
 
 const updateTransaction = async (req, res, next) => {
-  res.status(200).json({
-    status: 'success',
-  });
+  try {
+    return res.status(200).json({
+      status: 'success',
+    });
+  } catch (err) {
+    return res.status(500).json({ err });
+  }
 };
 
 const removeTransaction = async (req, res, next) => {
-  res.status(200).json({
-    status: 'success',
-  });
+  try {
+    return res.status(200).json({
+      status: 'success',
+    });
+  } catch (err) {
+    return res.status(500).json({ err });
+  }
 };
 
 const getTransactionCategories = async (req, res, next) => {
-  res.status(200).json({
-    status: 'success',
-  });
+  try {
+    return res.status(200).json({
+      status: 'success',
+    });
+  } catch (err) {
+    return res.status(500).json({ err });
+  }
 };
 
 const getUserTransactions = async (req, res, next) => {
@@ -49,9 +69,13 @@ const getUserTransactions = async (req, res, next) => {
 };
 
 const getTransactionsSummary = async (req, res, next) => {
-  res.status(200).json({
-    status: 'success',
-  });
+  try {
+    return res.status(200).json({
+      status: 'success',
+    });
+  } catch (err) {
+    return res.status(500).json({ err });
+  }
 };
 
 module.exports = {
