@@ -1,3 +1,4 @@
+// const jwt = require('jsonwebtoken');
 const passport = require('../config/config-passport.js');
 
 const User = require('../models/userModel.js');
@@ -90,7 +91,7 @@ const signIn = async (req, res, next) => {
 const signOut = async (req, res, next) => {
   try {
     // wylogowaniem musi byc dodanie tokena do czanrje listy i przy funkcji auth sprawdzanie czy token nalezy do tej listy
-
+    
     res.status(200).json({
       status: 'success',
       data: null,
