@@ -12,18 +12,6 @@ const auth = async (req, res, next) => {
         });
       }
 
-      const authHeader = req.headers.authorization;
-      const token = authHeader && authHeader.split(' ')[1];
-
-      const allUsers = await User.find();
-      const isToken = allUsers.some(user => user.token === token);
-      if (!isToken) {
-        return res.status(401).json({
-          status: 'error',
-          message: 'Unauthorized',
-        });
-      }
-
       req.user = user;
       next();
     })(req, res, next);
@@ -72,9 +60,9 @@ const signIn = async (req, res, next) => {
   try {
     const { email } = req.body;
     const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(404).json({ Error: `Not found User` });
-    }
+
+    if (!user) return res.status(404).json({ status: 'fail', message: 'User not found' });
+
     const payload = {
       id: user.id,
       username: user.email,
