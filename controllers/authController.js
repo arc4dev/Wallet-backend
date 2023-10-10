@@ -1,4 +1,5 @@
 const passport = require('../config/config-passport.js');
+
 const User = require('../models/userModel.js');
 const jwt = require('jsonwebtoken');
 
@@ -9,24 +10,17 @@ const signToken = payload =>
   });
 
 const auth = async (req, res, next) => {
-  try {
-    await passport.authenticate('jwt', { session: false }, async (err, user) => {
-      if (!user || err) {
-        return res.status(401).json({
-          status: 'fail',
-          message: 'Unauthorized',
-        });
-      }
+  await passport.authenticate('jwt', { session: false }, async (err, user) => {
+    if (!user || err) {
+      return res.status(401).json({
+        status: 'fail',
+        message: 'Unauthorized',
+      });
+    }
 
-      req.user = user;
-      next();
-    })(req, res, next);
-  } catch (error) {
-    res.status(500).json({
-      status: 'error',
-      message: 'An error occurred during authentication.',
-    });
-  }
+    req.user = user;
+    next();
+  })(req, res, next);
 };
 
 const signUp = async (req, res, next) => {
@@ -106,29 +100,8 @@ const signOut = async (req, res, next) => {
   }
 };
 
-const getCurrentUser = async (req, res, next) => {
-  try {
-    const { id } = req.user;
-    // 1. Find a user
-    const user = await User.findById(id);
-    if (!user) {
-      return res.status(404).json({ status: 'fail', message: 'User not found' });
-    }
-
-    // 2. Send a response
-    res.status(200).json({
-      status: 'success',
-      data: user,
-    });
-  } catch (err) {
-    res.status(400).json({ status: 'fail', message: err.message });
-  }
-};
-
 module.exports = {
   signUp,
   signIn,
   signOut,
-  getCurrentUser,
-  auth,
 };

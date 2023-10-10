@@ -14,7 +14,7 @@ const userSchema = new mongoose.Schema({
   name: {
     type: String,
     default: null,
-    // require: [true, 'Name is require'],
+    required: [true, 'Name is require'],
   },
   token: {
     type: String,
