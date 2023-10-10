@@ -11,7 +11,7 @@ const transactionSchema = new mongoose.Schema({
     required: [true, 'A transaction must have an owner'],
   },
   date: {
-    type: String,
+    type: Date,
     required: [true, 'Data is required'],
   },
   category: {
