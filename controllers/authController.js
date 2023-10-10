@@ -118,9 +118,24 @@ const signOut = async (req, res, next) => {
 };
 
 const getCurrentUser = async (req, res, next) => {
-  res.status(200).json({
-    status: 'success',
-  });
+  try {
+    const { id } = req.user;
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    return res.status(200).json({
+      status: 'success',
+      code: 200,
+      data: user,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      status: 'error',
+      code: 500,
+      message: `${err}`,
+    });
+  }
 };
 
 module.exports = {
