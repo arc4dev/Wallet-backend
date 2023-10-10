@@ -15,6 +15,8 @@ router
 
 router.get('/transaction-categories', transactionsController.getTransactionCategories);
 
+router.get('/user-transactions', transactionsController.getUserTransactions);
+
 router.get('/transactions-summary', transactionsController.getTransactionsSummary);
 
 module.exports = router;
