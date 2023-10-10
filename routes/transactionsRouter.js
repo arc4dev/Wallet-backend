@@ -4,6 +4,7 @@ const authController = require('../controllers/authController');
 
 const router = express.Router();
 
+// Auth before all requests
 router.use(authController.auth);
 
 router
@@ -16,14 +17,8 @@ router
   .patch(transactionsController.updateTransaction)
   .delete(transactionsController.removeTransaction);
 
-router.get(
-  '/transaction-categories',
-  transactionsController.getTransactionCategories
-);
+router.get('/transaction-categories', transactionsController.getTransactionCategories);
 
-router.get(
-  '/transactions-summary',
-  transactionsController.getTransactionsSummary
-);
+router.get('/transactions-summary', transactionsController.getTransactionsSummary);
 
 module.exports = router;
