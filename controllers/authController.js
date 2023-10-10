@@ -1,95 +1,109 @@
 // const jwt = require('jsonwebtoken');
 const passport = require('../config/config-passport.js');
-const User = require('../models/userModel.js');
 
-const auth = (req, res, next) => {
-  passport.authenticate('jwt', { session: false }, (err, user) => {
+const User = require('../models/userModel.js');
+const jwt = require('jsonwebtoken');
+
+// helpers
+const signToken = payload =>
+  jwt.sign(payload, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRATION,
+  });
+
+const auth = async (req, res, next) => {
+  await passport.authenticate('jwt', { session: false }, async (err, user) => {
     if (!user || err) {
       return res.status(401).json({
-        status: 'error',
+        status: 'fail',
         message: 'Unauthorized',
       });
     }
+
     req.user = user;
     next();
   })(req, res, next);
-
 };
 
 const signUp = async (req, res, next) => {
   try {
-    // const { body } = req;
-    // const { email, name, password } = body;
-    // const user = await User.create({
-    //   name,
-    //   email,
-    //   password,
-    // });
-    // const payload = {
-    //   id: user.id,
-    //   username: email,
-    // };
-    // const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const { body } = req;
+    const { email, name, password } = body;
 
-    // user.token = token;
-    // await user.save();
-    // const user = await User.find();
-    // const singleUser = user.find(user => user.email === email);
-    // if (!singleUser) {
-    // return console.log('cannot find user');
-    // }
+    // 1. Create a user
+    const user = await User.create({
+      name,
+      email,
+      password,
+    });
 
-    res.status(200).json({
+    // 2. Sign a token to that user
+    const token = signToken({
+      id: user.id,
+      username: email,
+    });
+
+    // 3. Send a token to the client
+    res.status(201).json({
       status: 'success',
-      message: 'User signed up',
-      // token
+      token,
+      data: user,
     });
   } catch (err) {
-    res.status(500).json({ error: 'Registration failed' });
+    res.status(400).json({ status: 'fail', message: err.message });
   }
 };
 
 const signIn = async (req, res, next) => {
-  res.status(200).json({
-    status: 'success',
-    message: 'User logged in',
-  });
-};
-
-const signOut = async (req, res, next) => {
-  const getUserbyId = async id => {
-    try {
-      return await User.findById(id);
-    } catch (e) {
-      console.log(e);
-    }
-  };
   try {
-    const { id } = req.user;
-    const user = await getUserbyId(id);
-    if (!user) {
-      return res.status(404).json('Error! User not found!');
-    }
-    user.token = null;
-    await user.save();
-    res.status(204).json({ message: 'User signed out' });
-  } catch (error) {
-    res.status(401).json({
-      message: 'Bearer auth failed',
+    const { email, password } = req.body;
+
+    // 1) Check if password and email are provided
+    if (!email || !password)
+      return res
+        .status(400)
+        .json({ status: 'fail', message: 'Please provide an email or password' });
+
+    // 2) Check if user exists and password is correct
+    const user = await User.findOne({
+      email,
+    }).select('+password');
+
+    if (!user || !(await user.isCorrectPassword(password, user.password)))
+      return res
+        .status(400)
+        .json({ status: 'fail', message: 'The email or password is incorrect!' });
+
+    // 3) If everything is ok, send token to client
+    const token = signToken({
+      id: user.id,
+      username: email,
     });
+
+    res.status(200).json({
+      status: 'success',
+      token,
+    });
+  } catch (err) {
+    res.status(400).json({ status: 'fail', message: err.message });
   }
 };
 
-const getCurrentUser = async (req, res, next) => {
-  res.status(200).json({
-    status: 'success',
-  });
+const signOut = async (req, res, next) => {
+  try {
+    // wylogowaniem musi byc dodanie tokena do czanrje listy i przy funkcji auth sprawdzanie czy token nalezy do tej listy
+    
+    res.status(200).json({
+      status: 'success',
+      data: null,
+    });
+  } catch (err) {
+    res.status(400).json({ status: 'fail', message: err.message });
+  }
 };
 
 module.exports = {
   signUp,
   signIn,
   signOut,
-  getCurrentUser,
   auth,
 };

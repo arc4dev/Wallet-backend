@@ -1,7 +1,11 @@
 const express = require('express');
 const transactionsController = require('../controllers/transactionsController');
+const authController = require('../controllers/authController');
 
 const router = express.Router();
+
+// Auth before all requests
+router.use(authController.auth);
 
 router
   .route('/')
