@@ -6,7 +6,7 @@ const cors = require('cors');
 
 const authRouter = require('./routes/authRouter');
 const transactionsRouter = require('./routes/transactionsRouter');
-const userRouter = require('./controllers/userController');
+const userRouter = require('./routes/userRouter');
 const errorHandler = require('./controllers/errorController');
 
 const app = express();
@@ -18,8 +18,8 @@ app.use(express.json());
 
 // Routes
 app.use('/api/auth', authRouter);
+app.use('/api/users', userRouter);
 app.use('/api/transactions', transactionsRouter);
-app.use('/users', userRouter);
 
 // Handle not defined routes
 app.all('*', (req, res, next) => {
