@@ -5,7 +5,7 @@ const userController = require('../controllers/userController');
 const router = express.Router();
 
 // Auth before all requests
-// router.use(authController.auth);
+router.use(authController.auth);
 
 router.get('/current', userController.getCurrentUser);
 
