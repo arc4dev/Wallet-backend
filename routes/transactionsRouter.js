@@ -9,7 +9,7 @@ router.use(authController.auth);
 
 router
   .route('/')
-  .get(transactionsController.getAllTransactions)
+  .get(authController.restrictTo('admin'), transactionsController.getAllTransactions)
   .post(transactionsController.createNewTransaction);
 
 router

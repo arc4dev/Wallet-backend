@@ -88,13 +88,21 @@ const signIn = async (req, res, next) => {
   }
 };
 
+const restrictTo = role => (req, res, next) => {
+  if (role !== req.user.role)
+    return res
+      .status(401)
+      .json({ status: 'fail', message: 'You don not have permission to acces this route!' });
+
+  next();
+};
+
 const signOut = async (req, res, next) => {
   try {
     // wylogowaniem musi byc dodanie tokena do czanrje listy i przy funkcji auth sprawdzanie czy token nalezy do tej listy
-    
+
     res.status(200).json({
       status: 'success',
-      data: null,
     });
   } catch (err) {
     res.status(400).json({ status: 'fail', message: err.message });
@@ -106,4 +114,5 @@ module.exports = {
   signIn,
   signOut,
   auth,
+  restrictTo,
 };
