@@ -22,8 +22,21 @@ const getCurrentUser = async (req, res, next) => {
 
 const getUserTransactions = async (req, res, next) => {
   try {
-    // Pobierz transakcje użytkownika na podstawie ID użytkownika
-    const userTransactions = await Transaction.find({ owner: req.user._id });
+    const userId = req.user._id;
+
+    const userTransactions = await Transaction.aggregate([
+      {
+        $match: {
+          owner: userId,
+        },
+      },
+      {
+        $group: {
+          _id: '$category', // Grupowanie transakcji według kategorii
+          transactions: { $push: '$$ROOT' }, // Przechowywanie całych dokumentów transakcji w tablicy
+        },
+      },
+    ]);
 
     res.status(200).json({
       status: 'success',
