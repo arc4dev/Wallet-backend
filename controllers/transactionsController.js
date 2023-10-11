@@ -30,21 +30,46 @@ const getAllTransactions = async (req, res, next) => {
 
 const updateTransaction = async (req, res, next) => {
   try {
-    res.status(200).json({
+    const updatedTransaction = await Transaction.findByIdAndUpdate(
+      req.params.transactionId,
+      req.body,
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+
+    if (!updatedTransaction)
+      return res.status(404).json({
+        status: 'fail',
+        message: 'Transaction not found',
+      });
+
+    res.status(201).json({
       status: 'success',
+      data: updatedTransaction,
     });
   } catch (err) {
-    res.status(500).json({ err });
+    res.status(400).json({ status: 'fail', message: err.message });
   }
 };
 
 const removeTransaction = async (req, res, next) => {
   try {
-    res.status(200).json({
+    const transaction = await Transaction.findByIdAndDelete(req.params.transactionId);
+
+    if (!transaction)
+      return res.status(404).json({
+        status: 'fail',
+        message: 'Transaction not found',
+      });
+
+    res.status(204).json({
       status: 'success',
+      data: null,
     });
   } catch (err) {
-    res.status(500).json({ err });
+    res.status(400).json({ status: 'fail', message: err.message });
   }
 };
 
@@ -71,85 +96,6 @@ const getTransactionsSummary = async (req, res, next) => {
   }
 };
 
-const getUserMonthlyStats = async (req, res, next) => {
-  try {
-    // Pobierz ID użytkownika i miesiąc z żądania
-    const userId = req.user._id;
-    const { year, month } = req.query;
-
-    // Oblicz statystyki za określony miesiąc
-    const userMonthlyStats = await Transaction.aggregate([
-      {
-        $match: {
-          owner: userId,
-          $expr: {
-            $eq: [{ $year: '$date' }, parseInt(year)],
-            $eq: [{ $month: '$date' }, parseInt(month)],
-          },
-        },
-      },
-      {
-        $group: {
-          _id: null,
-          totalIncome: {
-            $sum: { $cond: [{ $eq: ['$amount', { $abs: '$amount' }] }, '$amount', 0] },
-          },
-          totalExpense: { $sum: { $cond: [{ $lt: ['$amount', 0] }, '$amount', 0] } },
-        },
-      },
-    ]);
-
-    res.status(200).json({
-      status: 'success',
-      monthlyStats: userMonthlyStats[0],
-    });
-  } catch (err) {
-    res.status(500).json({
-      status: 'error',
-      message: 'An error occurred while fetching user monthly stats.',
-    });
-  }
-};
-
-const getUserYearlyStats = async (req, res, next) => {
-  try {
-    // Pobierz ID użytkownika i rok z żądania
-    const userId = req.user._id;
-    const year = req.query.year;
-
-    // Oblicz statystyki za określony rok
-    const userYearlyStats = await Transaction.aggregate([
-      {
-        $match: {
-          owner: userId,
-          $expr: {
-            $eq: [{ $year: '$date' }, parseInt(year)],
-          },
-        },
-      },
-      {
-        $group: {
-          _id: null,
-          totalIncome: {
-            $sum: { $cond: [{ $eq: ['$amount', { $abs: '$amount' }] }, '$amount', 0] },
-          },
-          totalExpense: { $sum: { $cond: [{ $lt: ['$amount', 0] }, '$amount', 0] } },
-        },
-      },
-    ]);
-
-    res.status(200).json({
-      status: 'success',
-      yearlyStats: userYearlyStats[0],
-    });
-  } catch (err) {
-    res.status(500).json({
-      status: 'error',
-      message: 'An error occurred while fetching user yearly stats.',
-    });
-  }
-};
-
 module.exports = {
   createNewTransaction,
   getAllTransactions,
@@ -157,6 +103,4 @@ module.exports = {
   removeTransaction,
   getTransactionCategories,
   getTransactionsSummary,
-  getUserMonthlyStats,
-  getUserYearlyStats,
 };

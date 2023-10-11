@@ -21,8 +21,4 @@ router.get('/transaction-categories', transactionsController.getTransactionCateg
 
 router.get('/transactions-summary', transactionsController.getTransactionsSummary);
 
-router.get('/user-monthly-stats', transactionsController.getUserMonthlyStats);
-
-router.get('/user-yearly-stats', transactionsController.getUserYearlyStats);
-
 module.exports = router;
