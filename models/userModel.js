@@ -24,15 +24,14 @@ const userSchema = new mongoose.Schema({
     },
     default: 'user',
   },
-  //   verify: {
-  //     type: Boolean,
-  //     default: false,
-  //   },
-  //   verificationToken: {
-  //     type: String,
-  //     required: [true, 'Verify token is required'],
-  //   },
-  // });
+  verify: {
+    type: Boolean,
+    default: false,
+  },
+  verificationToken: {
+    type: String,
+    required: [true, 'Verify token is required'],
+  },
 });
 
 // Hash password before save

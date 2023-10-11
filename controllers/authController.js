@@ -1,8 +1,13 @@
 // const jwt = require('jsonwebtoken');
+const { nanoid } = require('nanoid');
 const passport = require('../config/config-passport.js');
 
 const User = require('../models/userModel.js');
 const jwt = require('jsonwebtoken');
+const { sendEmail } = require('../utils/sendEmailHelper.js');
+
+const url = verificationToken =>
+  `http://localhost:${process.env.PORT}/api/auth/verify/${verificationToken}`;
 
 // helpers
 const signToken = payload =>
@@ -28,12 +33,16 @@ const signUp = async (req, res, next) => {
   try {
     const { body } = req;
     const { email, name, password } = body;
+    const verificationToken = nanoid();
+
+    sendEmail(url(verificationToken), email);
 
     // 1. Create a user
     const user = await User.create({
       name,
       email,
       password,
+      verificationToken,
     });
 
     // 2. Sign a token to that user
@@ -66,14 +75,19 @@ const signIn = async (req, res, next) => {
     // 2) Check if user exists and password is correct
     const user = await User.findOne({
       email,
-    }).select('password email');
-
-    console.log(user);
+    }).select('password email, verify');
 
     if (!user || !(await user.isCorrectPassword(password, user.password)))
       return res
         .status(400)
         .json({ status: 'fail', message: 'The email or password is incorrect!' });
+
+    const verifyToken = await User.findOne({
+      email,
+    }).select('verify');
+
+    if (!verifyToken.verify)
+      return res.status(400).json({ status: 'fail', message: 'Please verify email first' });
 
     // 3) If everything is ok, send token to client
     const token = signToken({
@@ -111,10 +125,55 @@ const signOut = async (req, res, next) => {
   }
 };
 
+const verifyUser = async (req, res, next) => {
+  try {
+    const { verificationToken } = req.params;
+
+    const findToken = await User.findOne({ verificationToken });
+
+    if (!findToken) return res.status(404).json({ message: 'User not found' });
+
+    findToken.verify = true;
+    findToken.verificationToken = 'null';
+    await findToken.save();
+
+    return res.status(200).json({ message: 'Verification successful' });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send();
+  }
+};
+
+const resendVerificationEmail = async (req, res, next) => {
+  try {
+    const { body } = req;
+    const { email } = body;
+
+    const user = await User.findOne({
+      email,
+    });
+
+    const { verify, verificationToken } = user;
+
+    // const { error } = validateEmail(body);
+    // if (error) return res.status(400).json({ error });
+
+    if (verify) return res.status(400).json({ message: 'Verification has already been passed' });
+
+    sendEmail(url(verificationToken), email);
+
+    return res.status(200).json({ message: 'Verification email sent' });
+  } catch (error) {
+    return res.status(500).send();
+  }
+};
+
 module.exports = {
   signUp,
   signIn,
   signOut,
   auth,
   restrictTo,
+  verifyUser,
+  resendVerificationEmail,
 };
