@@ -39,26 +39,22 @@ const getUserTransactions = async (req, res, next) => {
 
 const getUserMonthlyStats = async (req, res, next) => {
   try {
-    // Pobierz ID użytkownika i miesiąc z żądania
-    const userId = req.user._id;
+    const userId = req.user._id; // Zakładam, że masz dostęp do zalogowanego użytkownika z uwierzytelnienia
     const { year, month } = req.query;
 
-    // Oblicz statystyki za określony miesiąc
     const userMonthlyStats = await Transaction.aggregate([
       {
         $match: {
           owner: userId,
           $expr: {
-            $and: [
-              { $eq: [{ $year: '$date' }, parseInt(year)] },
-              { $eq: [{ $month: '$date' }, parseInt(month)] },
-            ],
+            $eq: [{ $year: '$date' }, parseInt(year)],
+            $eq: [{ $month: '$date' }, parseInt(month)],
           },
         },
       },
       {
         $group: {
-          _id: null,
+          _id: '$category', // Grupowanie transakcji według kategorii
           totalIncome: {
             $sum: { $cond: [{ $eq: ['$amount', { $abs: '$amount' }] }, '$amount', 0] },
           },
@@ -69,23 +65,21 @@ const getUserMonthlyStats = async (req, res, next) => {
 
     res.status(200).json({
       status: 'success',
-      data: userMonthlyStats[0] || [],
+      monthlyStats: userMonthlyStats,
     });
   } catch (err) {
-    res.status(400).json({
-      status: 'fail',
-      message: err.message,
+    res.status(500).json({
+      status: 'error',
+      message: 'An error occurred while fetching user monthly stats.',
     });
   }
 };
 
 const getUserYearlyStats = async (req, res, next) => {
   try {
-    // Pobierz ID użytkownika i rok z żądania
-    const userId = req.user._id;
-    const { year } = req.query;
+    const userId = req.user._id; // Zakładam, że masz dostęp do zalogowanego użytkownika z uwierzytelnienia
+    const year = req.query.year;
 
-    // Oblicz statystyki za określony rok
     const userYearlyStats = await Transaction.aggregate([
       {
         $match: {
@@ -97,7 +91,7 @@ const getUserYearlyStats = async (req, res, next) => {
       },
       {
         $group: {
-          _id: null,
+          _id: '$category', // Grupowanie transakcji według kategorii
           totalIncome: {
             $sum: { $cond: [{ $eq: ['$amount', { $abs: '$amount' }] }, '$amount', 0] },
           },
@@ -108,16 +102,15 @@ const getUserYearlyStats = async (req, res, next) => {
 
     res.status(200).json({
       status: 'success',
-      yearlyStats: userYearlyStats[0] || [],
+      yearlyStats: userYearlyStats,
     });
   } catch (err) {
-    res.status(400).json({
+    res.status(500).json({
       status: 'error',
-      message: err.message,
+      message: 'An error occurred while fetching user yearly stats.',
     });
   }
 };
-
 module.exports = {
   getCurrentUser,
   getUserTransactions,
