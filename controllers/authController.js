@@ -66,7 +66,9 @@ const signIn = async (req, res, next) => {
     // 2) Check if user exists and password is correct
     const user = await User.findOne({
       email,
-    }).select('+password');
+    }).select('password email');
+
+    console.log(user);
 
     if (!user || !(await user.isCorrectPassword(password, user.password)))
       return res

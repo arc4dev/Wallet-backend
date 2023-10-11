@@ -48,7 +48,7 @@ userSchema.pre('save', async function (next) {
 
 // Exclude fields before find
 userSchema.pre(/^find/, function (next) {
-  this.select('-__v -password');
+  this.select('-password');
 
   next();
 });
