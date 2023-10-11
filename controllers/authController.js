@@ -27,13 +27,14 @@ const auth = async (req, res, next) => {
 const signUp = async (req, res, next) => {
   try {
     const { body } = req;
-    const { email, name, password } = body;
+    const { email, name, password, passwordConfirm } = body;
 
     // 1. Create a user
     const user = await User.create({
       name,
       email,
       password,
+      passwordConfirm,
     });
 
     // 2. Sign a token to that user
@@ -67,8 +68,6 @@ const signIn = async (req, res, next) => {
     const user = await User.findOne({
       email,
     }).select('password email');
-
-    console.log(user);
 
     if (!user || !(await user.isCorrectPassword(password, user.password)))
       return res
