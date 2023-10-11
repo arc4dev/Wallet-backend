@@ -50,7 +50,6 @@ const removeTransaction = async (req, res, next) => {
 
 const getTransactionCategories = async (req, res, next) => {
   try {
-    // Używa agregacji MongoDB, aby pobrać unikalne kategorie transakcji
     const categories = await Transaction.distinct('category');
 
     return res.status(200).json({
@@ -72,6 +71,85 @@ const getTransactionsSummary = async (req, res, next) => {
   }
 };
 
+const getUserMonthlyStats = async (req, res, next) => {
+  try {
+    // Pobierz ID użytkownika i miesiąc z żądania
+    const userId = req.user._id;
+    const { year, month } = req.query;
+
+    // Oblicz statystyki za określony miesiąc
+    const userMonthlyStats = await Transaction.aggregate([
+      {
+        $match: {
+          owner: userId,
+          $expr: {
+            $eq: [{ $year: '$date' }, parseInt(year)],
+            $eq: [{ $month: '$date' }, parseInt(month)],
+          },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalIncome: {
+            $sum: { $cond: [{ $eq: ['$amount', { $abs: '$amount' }] }, '$amount', 0] },
+          },
+          totalExpense: { $sum: { $cond: [{ $lt: ['$amount', 0] }, '$amount', 0] } },
+        },
+      },
+    ]);
+
+    res.status(200).json({
+      status: 'success',
+      monthlyStats: userMonthlyStats[0],
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: 'error',
+      message: 'An error occurred while fetching user monthly stats.',
+    });
+  }
+};
+
+const getUserYearlyStats = async (req, res, next) => {
+  try {
+    // Pobierz ID użytkownika i rok z żądania
+    const userId = req.user._id;
+    const year = req.query.year;
+
+    // Oblicz statystyki za określony rok
+    const userYearlyStats = await Transaction.aggregate([
+      {
+        $match: {
+          owner: userId,
+          $expr: {
+            $eq: [{ $year: '$date' }, parseInt(year)],
+          },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalIncome: {
+            $sum: { $cond: [{ $eq: ['$amount', { $abs: '$amount' }] }, '$amount', 0] },
+          },
+          totalExpense: { $sum: { $cond: [{ $lt: ['$amount', 0] }, '$amount', 0] } },
+        },
+      },
+    ]);
+
+    res.status(200).json({
+      status: 'success',
+      yearlyStats: userYearlyStats[0],
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: 'error',
+      message: 'An error occurred while fetching user yearly stats.',
+    });
+  }
+};
+
 module.exports = {
   createNewTransaction,
   getAllTransactions,
@@ -79,4 +157,6 @@ module.exports = {
   removeTransaction,
   getTransactionCategories,
   getTransactionsSummary,
+  getUserMonthlyStats,
+  getUserYearlyStats,
 };
