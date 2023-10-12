@@ -6,15 +6,16 @@ const User = require('../models/userModel.js');
 const jwt = require('jsonwebtoken');
 const { sendEmail } = require('../utils/sendEmailHelper.js');
 
-const url = verificationToken =>
-  `http://localhost:${process.env.PORT}/api/auth/verify/${verificationToken}`;
-
 // helpers
 const signToken = payload =>
   jwt.sign(payload, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRATION,
   });
 
+const url = (verificationToken, req) =>
+  `${req.protocol}://${req.get('host')}/api/auth/verify/${verificationToken}`;
+
+// Controller
 const auth = async (req, res, next) => {
   await passport.authenticate('jwt', { session: false }, async (err, user) => {
     if (!user || err) {
@@ -33,25 +34,25 @@ const signUp = async (req, res, next) => {
   try {
     const { body } = req;
     const { email, name, password } = body;
-    const verificationToken = nanoid();
-
-    sendEmail(url(verificationToken), email);
 
     // 1. Create a user
     const user = await User.create({
       name,
       email,
       password,
-      verificationToken,
+      verificationToken: nanoid(),
     });
 
-    // 2. Sign a token to that user
+    // 2. Send verification email
+    sendEmail(url(user.verificationToken, req), email);
+
+    // 3. Sign a token to that user
     const token = signToken({
       id: user.id,
       username: email,
     });
 
-    // 3. Send a token to the client
+    // 4. Send a token to the client
     res.status(201).json({
       status: 'success',
       token,
@@ -66,30 +67,27 @@ const signIn = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
-    // 1) Check if password and email are provided
+    // 1. Check if password and email are provided
     if (!email || !password)
       return res
         .status(400)
         .json({ status: 'fail', message: 'Please provide an email or password' });
 
-    // 2) Check if user exists and password is correct
+    // 2. Check if user exists and password is correct
     const user = await User.findOne({
       email,
-    }).select('password email, verify');
+    }).select('password email verify');
 
     if (!user || !(await user.isCorrectPassword(password, user.password)))
       return res
         .status(400)
         .json({ status: 'fail', message: 'The email or password is incorrect!' });
 
-    const verifyToken = await User.findOne({
-      email,
-    }).select('verify');
+    // 3. Check if user verified his account
+    if (!user.verify)
+      return res.status(400).json({ status: 'fail', message: 'Please verify your email first!' });
 
-    if (!verifyToken.verify)
-      return res.status(400).json({ status: 'fail', message: 'Please verify email first' });
-
-    // 3) If everything is ok, send token to client
+    // 4. If everything is ok, send token to client
     const token = signToken({
       id: user.id,
       username: email,
