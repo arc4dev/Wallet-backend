@@ -35,12 +35,21 @@ const signUp = async (req, res, next) => {
     const { body } = req;
     const { email, name, password, passwordConfirm } = body;
 
+    const findUser = await User.findOne({
+      email,
+    }).select('password email verify');
+
+    console.log(findUser);
+
+    if (findUser)
+      return res.status(400).json({ status: 'fail', message: 'User is alredy registered' });
+
     // 1. Create a user
     const user = await User.create({
       name,
       email,
       password,
-      passwordConfirm,
+      // passwordConfirm,
       verificationToken: nanoid(),
     });
 
@@ -133,7 +142,8 @@ const verifyUser = async (req, res, next) => {
     if (!user) return res.status(404).json({ status: 'fail', message: 'User not found' });
 
     user.verify = true;
-    user.verificationToken = null;
+    user.verificationToken = 'null';
+    console.log(user);
     await user.save();
 
     res.status(200).json({ status: 'success', message: 'Verification successful' });
