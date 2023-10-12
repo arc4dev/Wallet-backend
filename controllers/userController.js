@@ -22,25 +22,26 @@ const getCurrentUser = async (req, res, next) => {
 
 const getUserTransactions = async (req, res, next) => {
   try {
-    const userId = req.user._id;
+    // Pobierz transakcje użytkownika na podstawie ID użytkownika
+    const userTransactions = await Transaction.find({ owner: req.user._id });
 
-    const userTransactions = await Transaction.aggregate([
-      {
-        $match: {
-          owner: userId,
-        },
-      },
-      {
-        $group: {
-          _id: '$category', // Grupowanie transakcji według kategorii
-          transactions: { $push: '$$ROOT' }, // Przechowywanie całych dokumentów transakcji w tablicy
-        },
-      },
-    ]);
+    // Oblicz totalIncome i totalExpenses na podstawie pobranych transakcji
+    let totalIncome = 0;
+    let totalExpenses = 0;
+
+    userTransactions.forEach(transaction => {
+      if (transaction.amount > 0) {
+        totalIncome += transaction.amount;
+      } else {
+        totalExpenses += transaction.amount;
+      }
+    });
 
     res.status(200).json({
       status: 'success',
       data: userTransactions,
+      totalIncome,
+      totalExpenses,
     });
   } catch (err) {
     res.status(400).json({
