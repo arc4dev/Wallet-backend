@@ -128,26 +128,23 @@ const verifyUser = async (req, res, next) => {
   try {
     const { verificationToken } = req.params;
 
-    const findToken = await User.findOne({ verificationToken });
+    const user = await User.findOne({ verificationToken });
 
-    if (!findToken) return res.status(404).json({ message: 'User not found' });
+    if (!user) return res.status(404).json({ status: 'fail', message: 'User not found' });
 
-    findToken.verify = true;
-    findToken.verificationToken = 'null';
-    await findToken.save();
+    user.verify = true;
+    user.verificationToken = null;
+    await user.save();
 
-    return res.status(200).json({ message: 'Verification successful' });
-  } catch (error) {
-    console.log(error);
-    return res.status(500).send();
+    res.status(200).json({ status: 'success', message: 'Verification successful' });
+  } catch (err) {
+    res.status(400).send({ status: 'fail', message: err.message });
   }
 };
 
 const resendVerificationEmail = async (req, res, next) => {
   try {
-    const { body } = req;
-    const { email } = body;
-
+    const { email } = req.body;
     const user = await User.findOne({
       email,
     });
@@ -157,13 +154,16 @@ const resendVerificationEmail = async (req, res, next) => {
     // const { error } = validateEmail(body);
     // if (error) return res.status(400).json({ error });
 
-    if (verify) return res.status(400).json({ message: 'Verification has already been passed' });
+    if (verify)
+      return res
+        .status(400)
+        .json({ status: 'fail', message: 'Verification has already been passed' });
 
-    sendEmail(url(verificationToken), email);
+    sendEmail(url(verificationToken, req), email);
 
-    return res.status(200).json({ message: 'Verification email sent' });
-  } catch (error) {
-    return res.status(500).send();
+    res.status(200).json({ status: 'success', message: 'Verification email sent' });
+  } catch (err) {
+    res.status(400).send({ status: 'fail', message: err.message });
   }
 };
 
