@@ -30,27 +30,51 @@ const getAllTransactions = async (req, res, next) => {
 
 const updateTransaction = async (req, res, next) => {
   try {
-    res.status(200).json({
+    const updatedTransaction = await Transaction.findByIdAndUpdate(
+      req.params.transactionId,
+      req.body,
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+
+    if (!updatedTransaction)
+      return res.status(404).json({
+        status: 'fail',
+        message: 'Transaction not found',
+      });
+
+    res.status(201).json({
       status: 'success',
+      data: updatedTransaction,
     });
   } catch (err) {
-    res.status(500).json({ err });
+    res.status(400).json({ status: 'fail', message: err.message });
   }
 };
 
 const removeTransaction = async (req, res, next) => {
   try {
-    res.status(200).json({
+    const transaction = await Transaction.findByIdAndDelete(req.params.transactionId);
+
+    if (!transaction)
+      return res.status(404).json({
+        status: 'fail',
+        message: 'Transaction not found',
+      });
+
+    res.status(204).json({
       status: 'success',
+      data: null,
     });
   } catch (err) {
-    res.status(500).json({ err });
+    res.status(400).json({ status: 'fail', message: err.message });
   }
 };
 
 const getTransactionCategories = async (req, res, next) => {
   try {
-    // Używa agregacji MongoDB, aby pobrać unikalne kategorie transakcji
     const categories = await Transaction.distinct('category');
 
     return res.status(200).json({
@@ -62,21 +86,10 @@ const getTransactionCategories = async (req, res, next) => {
   }
 };
 
-const getTransactionsSummary = async (req, res, next) => {
-  try {
-    res.status(200).json({
-      status: 'success',
-    });
-  } catch (err) {
-    res.status(500).json({ err });
-  }
-};
-
 module.exports = {
   createNewTransaction,
   getAllTransactions,
   updateTransaction,
   removeTransaction,
   getTransactionCategories,
-  getTransactionsSummary,
 };

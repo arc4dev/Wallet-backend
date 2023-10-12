@@ -11,4 +11,8 @@ router.get('/current', userController.getCurrentUser);
 
 router.get('/transactions', userController.getUserTransactions);
 
+router.get('/user-monthly-stats', userController.getUserMonthlyStats);
+
+router.get('/user-yearly-stats', userController.getUserYearlyStats);
+
 module.exports = router;
