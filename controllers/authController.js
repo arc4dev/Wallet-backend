@@ -69,7 +69,7 @@ const signIn = async (req, res, next) => {
     // 2. Check if user exists and password is correct
     const user = await User.findOne({
       email,
-    }).select('password email verify');
+    }).select('password email verify name');
 
     if (!user || !(await user.isCorrectPassword(password, user.password)))
       return res
@@ -88,6 +88,7 @@ const signIn = async (req, res, next) => {
 
     res.status(200).json({
       status: 'success',
+      data: { email: user.email, name: user.name },
       token,
     });
   } catch (err) {
