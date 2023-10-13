@@ -25,8 +25,11 @@ const getUserTransactions = async (req, res, next) => {
     // Pobierz transakcje użytkownika na podstawie ID użytkownika
     const userTransactions = await Transaction.find({ owner: req.user._id });
 
+    const balance = userTransactions.reduce((acc, curr) => acc + curr.amount, 0);
+
     res.status(200).json({
       status: 'success',
+      balance,
       data: userTransactions,
     });
   } catch (err) {
