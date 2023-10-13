@@ -33,40 +33,23 @@ const auth = async (req, res, next) => {
 const signUp = async (req, res, next) => {
   try {
     const { body } = req;
-    const { email, name, password, passwordConfirm } = body;
-
-    const findUser = await User.findOne({
-      email,
-    }).select('password email verify');
-
-    console.log(findUser);
-
-    if (findUser)
-      return res.status(400).json({ status: 'fail', message: 'User is alredy registered' });
+    const { email, name, password } = body;
 
     // 1. Create a user
     const user = await User.create({
       name,
       email,
       password,
-      // passwordConfirm,
       verificationToken: nanoid(),
     });
 
     // 2. Send verification email
     sendEmail(url(user.verificationToken, req), email);
 
-    // 3. Sign a token to that user
-    const token = signToken({
-      id: user.id,
-      username: email,
-    });
-
-    // 4. Send a token to the client
     res.status(201).json({
       status: 'success',
-      token,
-      data: user,
+      message:
+        'Account created. Please check your email to verify your account and log in afterwards!',
     });
   } catch (err) {
     res.status(400).json({ status: 'fail', message: err.message });
@@ -138,15 +121,19 @@ const verifyUser = async (req, res, next) => {
     const { verificationToken } = req.params;
 
     const user = await User.findOne({ verificationToken });
+    console.log(user);
 
     if (!user) return res.status(404).json({ status: 'fail', message: 'User not found' });
 
     user.verify = true;
-    user.verificationToken = 'null';
-    console.log(user);
-    await user.save();
+    user.verificationToken = null;
 
-    res.status(200).json({ status: 'success', message: 'Verification successful' });
+    await user.save();
+    console.log(user);
+
+    res
+      .status(200)
+      .json({ status: 'success', message: 'Verification successful. You can low log in!' });
   } catch (err) {
     res.status(400).send({ status: 'fail', message: err.message });
   }
@@ -159,17 +146,12 @@ const resendVerificationEmail = async (req, res, next) => {
       email,
     });
 
-    const { verify, verificationToken } = user;
-
-    // const { error } = validateEmail(body);
-    // if (error) return res.status(400).json({ error });
-
-    if (verify)
+    if (!user || user.verify)
       return res
         .status(400)
         .json({ status: 'fail', message: 'Verification has already been passed' });
 
-    sendEmail(url(verificationToken, req), email);
+    sendEmail(url(user.verificationToken, req), email);
 
     res.status(200).json({ status: 'success', message: 'Verification email sent' });
   } catch (err) {
