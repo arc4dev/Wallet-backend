@@ -46,15 +46,15 @@ const getUserMonthlyStats = async (req, res, next) => {
       {
         $match: {
           owner: userId,
-          $expr: {
-            $eq: [{ $year: '$date' }, parseInt(year)],
-            $eq: [{ $month: '$date' }, parseInt(month)],
-          },
+          $and: [
+            { $expr: { $eq: [{ $year: '$date' }, parseInt(year)] } },
+            { $expr: { $eq: [{ $month: '$date' }, parseInt(month)] } },
+          ],
         },
       },
       {
         $group: {
-          _id: '$category', // Grupowanie transakcji według kategorii
+          _id: '$category',
           totalIncome: {
             $sum: { $cond: [{ $eq: ['$amount', { $abs: '$amount' }] }, '$amount', 0] },
           },
@@ -65,7 +65,7 @@ const getUserMonthlyStats = async (req, res, next) => {
 
     res.status(200).json({
       status: 'success',
-      monthlyStats: userMonthlyStats,
+      data: userMonthlyStats,
     });
   } catch (err) {
     res.status(500).json({
@@ -102,7 +102,7 @@ const getUserYearlyStats = async (req, res, next) => {
 
     res.status(200).json({
       status: 'success',
-      yearlyStats: userYearlyStats,
+      data: userYearlyStats,
     });
   } catch (err) {
     res.status(500).json({
