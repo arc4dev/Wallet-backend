@@ -2,10 +2,10 @@ const Transaction = require('../models/transactionModel');
 
 const createNewTransaction = async (req, res, next) => {
   try {
-    const { amount, date, category, comment } = req.body;
+    const { sum, date, category, comment } = req.body;
 
     const newTransaction = await Transaction.create({
-      amount,
+      sum,
       date,
       category,
       comment,

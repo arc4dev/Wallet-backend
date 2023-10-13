@@ -1,9 +1,9 @@
 const mongoose = require('mongoose');
 
 const transactionSchema = new mongoose.Schema({
-  amount: {
+  sum: {
     type: Number,
-    required: [true, 'Amount is required'],
+    required: [true, 'Sum is required'],
   },
   owner: {
     type: mongoose.Schema.Types.ObjectId,
@@ -12,18 +12,31 @@ const transactionSchema = new mongoose.Schema({
   },
   date: {
     type: Date,
-    required: [true, 'Data is required'],
+    required: [true, 'Date is required'],
   },
   category: {
     type: String,
-    sparse: true,
+    enum: {
+      values: [
+        'main expenses',
+        'self care',
+        'products',
+        'child care',
+        'household products',
+        'education',
+        'leisure',
+      ],
+      message:
+        'Category must be only these: [main expenses, self care, products, child care, household products, education, leisure]',
+    },
   },
   comment: String,
+  type: String,
 });
 
-// Exclude fields before find
-transactionSchema.pre(/^find/, function (next) {
-  this.select('-__v');
+// Add type property before save
+transactionSchema.pre('save', function (next) {
+  this.type = this.sum >= 0 ? '+' : '-';
 
   next();
 });

@@ -25,7 +25,7 @@ const getUserTransactions = async (req, res, next) => {
     // Pobierz transakcje użytkownika na podstawie ID użytkownika
     const userTransactions = await Transaction.find({ owner: req.user._id });
 
-    const balance = userTransactions.reduce((acc, curr) => acc + curr.amount, 0);
+    const balance = userTransactions.reduce((acc, curr) => acc + curr.sum, 0);
 
     res.status(200).json({
       status: 'success',
@@ -59,9 +59,9 @@ const getUserMonthlyStats = async (req, res, next) => {
         $group: {
           _id: '$category',
           totalIncome: {
-            $sum: { $cond: [{ $eq: ['$amount', { $abs: '$amount' }] }, '$amount', 0] },
+            $sum: { $cond: [{ $eq: ['$sum', { $abs: '$sum' }] }, '$sum', 0] },
           },
-          totalExpense: { $sum: { $cond: [{ $lt: ['$amount', 0] }, '$amount', 0] } },
+          totalExpense: { $sum: { $cond: [{ $lt: ['$sum', 0] }, '$sum', 0] } },
         },
       },
     ]);
@@ -96,9 +96,9 @@ const getUserYearlyStats = async (req, res, next) => {
         $group: {
           _id: '$category', // Grupowanie transakcji według kategorii
           totalIncome: {
-            $sum: { $cond: [{ $eq: ['$amount', { $abs: '$amount' }] }, '$amount', 0] },
+            $sum: { $cond: [{ $eq: ['$sum', { $abs: '$sum' }] }, '$sum', 0] },
           },
-          totalExpense: { $sum: { $cond: [{ $lt: ['$amount', 0] }, '$amount', 0] } },
+          totalExpense: { $sum: { $cond: [{ $lt: ['$sum', 0] }, '$sum', 0] } },
         },
       },
     ]);
