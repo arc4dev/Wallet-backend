@@ -25,16 +25,19 @@ const transactionSchema = new mongoose.Schema({
         'household products',
         'education',
         'leisure',
+        'income',
+        'other expenses',
+        'entertainment',
+        'car',
       ],
       message:
-        'Category must be only these: [main expenses, self care, products, child care, household products, education, leisure]',
+        'Category must be only these: [main expenses, self care, products, child care, household products, education, leisure, income, other expenses, entertainment or car]',
     },
   },
   comment: String,
   type: String,
 });
 
-// Add type property before save
 transactionSchema.pre('save', function (next) {
   this.type = this.sum >= 0 ? '+' : '-';
 
