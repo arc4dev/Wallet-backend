@@ -12,16 +12,6 @@ const userSchema = new mongoose.Schema({
     trim: true,
     required: [true, 'Password is required'],
   },
-  passwordConfirm: {
-    type: String,
-    required: [true, 'You must confirm your password!'],
-    trim: true,
-    validate: {
-      validator: function (el) {
-        return this.password === el;
-      },
-    },
-  },
   name: {
     type: String,
     default: null,
@@ -41,7 +31,6 @@ const userSchema = new mongoose.Schema({
   },
   verificationToken: {
     type: String,
-    required: [true, 'Verify token is required'],
   },
 });
 
@@ -51,14 +40,12 @@ userSchema.pre('save', async function (next) {
 
   this.password = await bcrypt.hash(this.password, 12);
 
-  this.passwordConfirm = undefined;
-
   next();
 });
 
 // Exclude fields before find
 userSchema.pre(/^find/, function (next) {
-  this.select('-password');
+  this.select('-password -verify -verifi');
 
   next();
 });
